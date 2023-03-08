@@ -1,0 +1,143 @@
+
+Parameters:
+  LatestAmiId:
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/canonical/ubuntu/server/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id'
+
+  SubnetId:
+    Type: AWS::EC2::Subnet::Id
+    Default: "subnet-00282f95f4cf6f3b2"
+
+  VPCId:
+    Type: AWS::EC2::VPC::Id
+    Default: "vpc-0c042659b0e09be4c"
+
+  AppName:
+    Type: String
+    Default: "Videopass"
+
+  ImageVersion:
+    Type: String
+    Default: "1.0.0"
+
+  InstanceType:
+    Type: String
+    Default: "t3.medium"
+
+#  KeyPair:
+#    Type: AWS::EC2::KeyPair::KeyName
+
+Resources:
+
+  ImagePipeline:
+    Type: AWS::ImageBuilder::ImagePipeline
+    Properties:
+      Description: !Sub "${AppName} Image Pipeline"
+      DistributionConfigurationArn: !Ref DistributionConfiguration
+      ImageRecipeArn: !Ref ImageRecipe
+      InfrastructureConfigurationArn: !Ref InfrastructureConfiguration
+      Name: !Sub "${AppName} Image Pipeline"
+      Status: ENABLED
+    DependsOn:
+      - DistributionConfiguration
+      - ImageRecipe
+      - InfrastructureConfiguration
+
+  ImageBuilderRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: "AWSVideoPassImageBuilderRole"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+        - arn:aws:iam::aws:policy/AWSImageBuilderReadOnlyAccess
+      Path: /
+
+  ImageBuilderInstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      InstanceProfileName: !Sub "${AppName}ImageBuilderInstanceProfile"
+      Path: "/"
+      Roles:
+        - !Ref ImageBuilderRole
+
+  InfrastructureConfiguration:
+    Type: AWS::ImageBuilder::InfrastructureConfiguration
+    Properties:
+      InstanceProfileName: !Sub "${AppName}ImageBuilderInstanceProfile"
+      InstanceTypes:
+        - !Ref InstanceType
+      # KeyPair: !Ref KeyPair
+      Name: !Sub "${AppName} Image - Infrastructure Configuration"
+      SubnetId: !Ref SubnetId
+      SecurityGroupIds:
+        - !Ref ImageBuilderSecurityGroup
+    DependsOn:
+      - ImageBuilderInstanceProfile
+
+  ImageBuilderSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+        GroupDescription: Allow access to Image Builder instance.
+        VpcId: !Ref VPCId
+        SecurityGroupIngress:
+        - IpProtocol: tcp`
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 10.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
+
+  DistributionConfiguration:
+    Type: AWS::ImageBuilder::DistributionConfiguration
+    Properties:
+      Name: !Sub "${AppName} Image - Distribution Configuration"
+      Distributions:
+        - AmiDistributionConfiguration:
+            Name: !Sub "${AppName} Image - AmiCopyConfiguration - {{ imagebuilder:buildDate }}"
+            LaunchPermissionConfiguration:
+              UserIds:
+                - !Ref AWS::AccountId
+          Region: !Ref AWS::Region
+
+  ImageRecipe:
+    Type: AWS::ImageBuilder::ImageRecipe
+    Properties:
+      Components:
+        - ComponentArn: !GetAtt Component.Arn
+      Name: !Sub "${AppName} Image"
+      ParentImage: !Ref LatestAmiId
+      Version: !Ref ImageVersion
+
+  Component:
+    Type: AWS::ImageBuilder::Component
+    Properties:
+      Platform: Linux
+      Version: !Ref ImageVersion
+      Data: |
+        name: VideoPassComponent
+        description: Install the latest version of VideoPass dependencies
+        schemaVersion: 1.0
+        phases:
+          - name: build
+            steps:
+              - name: InstallVideoPassDependencies
+                action: ExecuteBash
+                inputs:
+                  commands:
+                    - sudo apt update -y && sudo apt install python3 wget htop dnsutils nload ncdu curl jq zip unzip git build-essential && sudo apt autoremove -y --purge
+                    - cd ~/ && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && sudo unzip awscliv2.zip && ./aws/install && rm -r ./aws
+                    - cd ~/ && wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb && sudo dpkg -i ./amazon-cloudwatch-agent.deb && rm ./amazon-cloudwatch-agent.deb
+                    - sudo systemctl stop snap.amazon-ssm-agent.amazon-ssm-agent.service
+                    - sudo snap refresh amazon-ssm-agent --channel=candidate
+                    - sudo systemctl start snap.amazon-ssm-agent.amazon-ssm-agent.service
