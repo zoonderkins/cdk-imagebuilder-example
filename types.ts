@@ -4,4 +4,5 @@ export type BasicOptions = {
     pureAmiId: string,
     ubuntuVersion: string,
     componentVersion: string,
+    phpVersion: string,
 }

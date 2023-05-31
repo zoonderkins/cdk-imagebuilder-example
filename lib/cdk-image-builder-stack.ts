@@ -4,6 +4,21 @@ import * as imagebuilder from 'aws-cdk-lib/aws-imagebuilder';
 import { Construct } from 'constructs';
 import { BasicOptions } from '../types';
 
+class CustomError extends Error {
+  constructor(public readonly code: number, message?: string) {
+    super(message);
+    Object.setPrototypeOf(this, CustomError.prototype);
+  }
+
+  public getErrorCode(): number {
+    if (this.code === 1) {
+      console.log("phpVersion is undefined");
+      process.exit(1)
+    }
+    return this.code;
+  }
+}
+
 export class CdkImageBuilderStack extends cdk.Stack {
   constructor(scope: Construct, id: string, appProps: BasicOptions, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -16,15 +31,17 @@ export class CdkImageBuilderStack extends cdk.Stack {
     let infraConfig: imagebuilder.CfnInfrastructureConfiguration;
     let pipeline: imagebuilder.CfnImagePipeline;
 
+    if (!appProps.phpVersion) throw new CustomError(1, "phpVersion is undefined");
+
     if (appProps.ubuntuVersion === "1804") {
 
       component = new imagebuilder.CfnComponent(this, 'VPComponent', {
-        name: `VideoPass-${appProps.ubuntuVersion}-Component`,
+        name: `VideoPass-${appProps.ubuntuVersion}-Component-`,
         version: appProps.componentVersion!,
         platform: 'Linux',
         data: `
         name: VPComponent
-        description: Ubuntu 18.04 VideoPass Golden Image Component
+        description: Ubuntu ${appProps.ubuntuVersion} VideoPass Component
         schemaVersion: 1.0
         phases:
           - name: build
@@ -45,7 +62,7 @@ export class CdkImageBuilderStack extends cdk.Stack {
                     - echo "Apt update and Upgrade"
                     - apt update -y && apt -y upgrade
                     - echo "Install Basic Dependencies"
-                    - apt install -y software-properties-common build-essential screen ntp wget htop dnsutils nload ncdu curl jq zip git
+                    - apt install -y software-properties-common python-software-properties build-essential screen ntp wget htop dnsutils nload ncdu curl jq zip git unzip
                     - echo "Install Perl Dependencies"
                     - apt install -y libwww-perl libjson-perl libhiredis-dev libcrypt-ssleay-perl libswitch-perl libhiredis-dev rsyslog --no-install-recommends
                     - echo "Install Python 3.9"
@@ -54,11 +71,11 @@ export class CdkImageBuilderStack extends cdk.Stack {
                     - echo "Install ppa:ondrej PHP, Gearman, Apache2"
                     - add-apt-repository ppa:ondrej/php -y
                     - add-apt-repository ppa:ondrej/pkg-gearman -y
-                    - add-apt-repository ppa:ondrej/apache2 -y
+                    - add-apt-repository ppa:ondrej/apache2 libapache2-mod-fastcgi -y
                     - echo "Install Apache2"
                     - apt install -y apache2
                     - echo "Install PHP 7"
-                    - apt install -y php7.2-mcrypt php7.2-curl php7.2-mbstring php7.2-mysql php7.2-xml php7.2-cli php7.2-dev php7.2-fpm php7.2-gd php7.2-json php7.2-readline php7.2-soap php7.2-zip php7.2-bcmath php7.2-intl php7.2-geoip php7.2-sqlite php7.2-redis php7.2-gearman php7.2-memcached
+                    - apt install -y php${appProps.phpVersion}-common php${appProps.phpVersion}-mcrypt php${appProps.phpVersion}-curl php${appProps.phpVersion}-mbstring php${appProps.phpVersion}-mysql php${appProps.phpVersion}-xml php${appProps.phpVersion}-cli php${appProps.phpVersion}-dev php${appProps.phpVersion}-fpm php${appProps.phpVersion}-gd php${appProps.phpVersion}-json php${appProps.phpVersion}-readline php${appProps.phpVersion}-soap php${appProps.phpVersion}-zip php${appProps.phpVersion}-bcmath php${appProps.phpVersion}-intl php${appProps.phpVersion}-geoip php${appProps.phpVersion}-sqlite php${appProps.phpVersion}-redis php${appProps.phpVersion}-gearman php${appProps.phpVersion}-memcached
                     - echo "Install Gearman"
                     - apt install -y libgearman-dev --no-install-recommends
                     - echo "Install Memcached"
