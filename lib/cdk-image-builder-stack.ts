@@ -62,7 +62,7 @@ export class CdkImageBuilderStack extends cdk.Stack {
                     - echo "Apt update and Upgrade"
                     - apt update -y && apt -y upgrade
                     - echo "Install Basic Dependencies"
-                    - apt install -y software-properties-common python-software-properties build-essential screen ntp wget htop dnsutils nload ncdu curl jq zip git unzip
+                    - apt install -y software-properties-common python-software-properties build-essential screen ntp wget htop dnsutils nload ncdu curl jq zip git neofetch
                     - echo "Install Perl Dependencies"
                     - apt install -y libwww-perl libjson-perl libhiredis-dev libcrypt-ssleay-perl libswitch-perl libhiredis-dev rsyslog --no-install-recommends
                     - echo "Install Python 3.9"

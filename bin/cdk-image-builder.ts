@@ -15,10 +15,10 @@ const ubuntu2204Props: BasicOptions = {
 
 // aws ssm get-parameters --profile telasa --names /aws/service/canonical/ubuntu/server/18.04/stable/current/amd64/hvm/ebs-gp2/ami-id --query 'Parameters[0].[Value]' --output text
 const ubuntu1804Props: BasicOptions = {
-   version: "1.1.2",
-   componentVersion: "1.1.2",
+   version: "1.1.4",
+   componentVersion: "1.1.4",
    projectName: "VP",
-   pureAmiId: "ami-058ad207057f85387",
+   pureAmiId: "ami-04705b95f49850f5e",
    ubuntuVersion: "1804",
    phpVersion: "7.2",
 }
