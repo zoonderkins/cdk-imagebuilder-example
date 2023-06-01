@@ -51,6 +51,12 @@ export class CdkImageBuilderStack extends cdk.Stack {
                 inputs:
                   commands:
                     - sed -i'' -e 's/.*requiretty.*//' /etc/sudoers
+                    - echo "Apt update and Upgrade"
+                    - apt update -y && apt -y upgrade && apt -y dist-upgrade
+                    - echo "Install Basic Dependencies"
+                    - apt install -y software-properties-common python-software-properties build-essential screen ntp wget htop dnsutils nload ncdu curl jq zip git neofetch unzip
+                    - echo "Install Perl Dependencies"
+                    - apt install -y libwww-perl libjson-perl libhiredis-dev libcrypt-ssleay-perl libswitch-perl libhiredis-dev rsyslog
                     - echo "Install AWS Session Manager"
                     - systemctl stop snap.amazon-ssm-agent.amazon-ssm-agent.service
                     - snap refresh amazon-ssm-agent --channel=candidate
@@ -59,12 +65,6 @@ export class CdkImageBuilderStack extends cdk.Stack {
                     - cd ~/ && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip && ./aws/install && rm -r ./aws
                     - echo "Install Cloudwatch Agent"
                     - cd ~/ && wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb && dpkg -i ./amazon-cloudwatch-agent.deb && rm ./amazon-cloudwatch-agent.deb
-                    - echo "Apt update and Upgrade"
-                    - apt update -y && apt -y upgrade
-                    - echo "Install Basic Dependencies"
-                    - apt install -y software-properties-common python-software-properties build-essential screen ntp wget htop dnsutils nload ncdu curl jq zip git neofetch
-                    - echo "Install Perl Dependencies"
-                    - apt install -y libwww-perl libjson-perl libhiredis-dev libcrypt-ssleay-perl libswitch-perl libhiredis-dev rsyslog --no-install-recommends
                     - echo "Install Python 3.9"
                     - add-apt-repository ppa:deadsnakes/ppa -y
                     - apt install -y python python-pip python3-pip python3.9
