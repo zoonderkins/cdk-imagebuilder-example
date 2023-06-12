@@ -23,6 +23,7 @@ export class CdkImageBuilderStack extends cdk.Stack {
   constructor(scope: Construct, id: string, appProps: BasicOptions, props?: cdk.StackProps) {
     super(scope, id, props);
 
+    let dotPhpVersion = appProps.phpVersion.replace("-", ".");
     let component: imagebuilder.CfnComponent;
     let receipe: imagebuilder.CfnImageRecipe;
     let instanceProfileRole: iam.Role;
@@ -35,13 +36,13 @@ export class CdkImageBuilderStack extends cdk.Stack {
 
     if (appProps.ubuntuVersion === "1804") {
 
-      component = new imagebuilder.CfnComponent(this, 'VPComponent', {
-        name: `VideoPass-${appProps.ubuntuVersion}-Component-`,
+      component = new imagebuilder.CfnComponent(this, `VPComponent-${appProps.phpVersion}`, {
+        name: `VideoPass-${appProps.ubuntuVersion}-${appProps.phpVersion}-Component`,
         version: appProps.componentVersion!,
         platform: 'Linux',
         data: `
         name: VPComponent
-        description: Ubuntu ${appProps.ubuntuVersion} VideoPass Component
+        description: Ubuntu ${appProps.ubuntuVersion}-${appProps.phpVersion} VideoPass Component
         schemaVersion: 1.0
         phases:
           - name: build
@@ -52,9 +53,15 @@ export class CdkImageBuilderStack extends cdk.Stack {
                   commands:
                     - sed -i'' -e 's/.*requiretty.*//' /etc/sudoers
                     - echo "Apt update and Upgrade"
-                    - apt update -y && apt -y upgrade && apt -y dist-upgrade
+                    - apt update -y && apt -y upgrade
+                    - echo "Install zip and Unzip"
+                    - apt install -y zip unzip
+                    - echo "Which zip and unzip"
+                    - which unzip && which zip
                     - echo "Install Basic Dependencies"
-                    - apt install -y software-properties-common python-software-properties build-essential screen ntp wget htop dnsutils nload ncdu curl jq zip git neofetch unzip
+                    - apt install -y software-properties-common build-essential
+                    - echo "Install other tools"
+                    - apt install -y screen ntp wget htop dnsutils nload ncdu curl jq git
                     - echo "Install Perl Dependencies"
                     - apt install -y libwww-perl libjson-perl libhiredis-dev libcrypt-ssleay-perl libswitch-perl libhiredis-dev rsyslog
                     - echo "Install AWS Session Manager"
@@ -75,7 +82,7 @@ export class CdkImageBuilderStack extends cdk.Stack {
                     - echo "Install Apache2"
                     - apt install -y apache2
                     - echo "Install PHP 7"
-                    - apt install -y php${appProps.phpVersion}-common php${appProps.phpVersion}-mcrypt php${appProps.phpVersion}-curl php${appProps.phpVersion}-mbstring php${appProps.phpVersion}-mysql php${appProps.phpVersion}-xml php${appProps.phpVersion}-cli php${appProps.phpVersion}-dev php${appProps.phpVersion}-fpm php${appProps.phpVersion}-gd php${appProps.phpVersion}-json php${appProps.phpVersion}-readline php${appProps.phpVersion}-soap php${appProps.phpVersion}-zip php${appProps.phpVersion}-bcmath php${appProps.phpVersion}-intl php${appProps.phpVersion}-geoip php${appProps.phpVersion}-sqlite php${appProps.phpVersion}-redis php${appProps.phpVersion}-gearman php${appProps.phpVersion}-memcached
+                    - apt install -y php${dotPhpVersion}-common php${dotPhpVersion}-mcrypt php${dotPhpVersion}-curl php${dotPhpVersion}-mbstring php${dotPhpVersion}-mysql php${dotPhpVersion}-xml php${dotPhpVersion}-cli php${dotPhpVersion}-dev php${dotPhpVersion}-fpm php${dotPhpVersion}-gd php${dotPhpVersion}-json php${dotPhpVersion}-readline php${dotPhpVersion}-soap php${dotPhpVersion}-zip php${dotPhpVersion}-bcmath php${dotPhpVersion}-intl php${dotPhpVersion}-geoip php${dotPhpVersion}-sqlite php${dotPhpVersion}-redis php${dotPhpVersion}-gearman php${dotPhpVersion}-memcached
                     - echo "Install Gearman"
                     - apt install -y libgearman-dev --no-install-recommends
                     - echo "Install Memcached"
@@ -87,8 +94,8 @@ export class CdkImageBuilderStack extends cdk.Stack {
         `
       })
 
-      receipe = new imagebuilder.CfnImageRecipe(this, 'VPImageRecipe', {
-        name: `VideoPass-${appProps.ubuntuVersion}-Receipe`,
+      receipe = new imagebuilder.CfnImageRecipe(this, `VPImageRecipe-${appProps.phpVersion}`, {
+        name: `VideoPass-${appProps.ubuntuVersion}-${appProps.phpVersion}-Receipe`,
         parentImage: appProps.pureAmiId,
         version: appProps.componentVersion,
         components: [{
@@ -96,37 +103,37 @@ export class CdkImageBuilderStack extends cdk.Stack {
         }],
       })
 
-      instanceProfileRole = new iam.Role(this, 'VPRole', {
+      instanceProfileRole = new iam.Role(this, `VPRole-${appProps.phpVersion}`, {
         assumedBy: new iam.ServicePrincipal('ec2.amazonaws.com'),
-        roleName: `VideoPass-${appProps.ubuntuVersion}-UbuntuEc2Role`,
+        roleName: `VideoPass-${appProps.ubuntuVersion}-${appProps.phpVersion}-UbuntuEc2Role`,
       })
 
-      instanceProfile = new iam.CfnInstanceProfile(this, 'VPInstanceProfile', {
-        instanceProfileName: `VideoPass-${appProps.ubuntuVersion}-Ec2InstanceProfile`,
+      instanceProfile = new iam.CfnInstanceProfile(this, `VPInstanceProfile-${appProps.phpVersion}`, {
+        instanceProfileName: `VideoPass-${appProps.ubuntuVersion}-${appProps.phpVersion}-Ec2InstanceProfile`,
         roles: [instanceProfileRole.roleName],
         path: "/executionServiceEC2Role/"
       })
 
-      infraConfig = new imagebuilder.CfnInfrastructureConfiguration(this, 'VPInfrastructureConfiguration', {
-        name: 'VPInfrastructureConfiguration',
+      infraConfig = new imagebuilder.CfnInfrastructureConfiguration(this, `VPInfrastructureConfiguration-${appProps.phpVersion}`, {
+        name: `VPInfrastructureConfiguration-${appProps.phpVersion}`,
         instanceProfileName: instanceProfile.instanceProfileName as string,
         instanceTypes: ['t3.xlarge'],
       })
 
-      distributionConfig = new imagebuilder.CfnDistributionConfiguration(this, 'VPDistributionConfiguration', {
-        name: 'VPDistributionConfiguration',
+      distributionConfig = new imagebuilder.CfnDistributionConfiguration(this, `VPDistributionConfiguration-${appProps.phpVersion}`, {
+        name: `VPDistributionConfiguration-${appProps.phpVersion}`,
         distributions: [
           {
-            region: 'ap-northeast-1',
+            region: props?.env?.region as string,
             amiDistributionConfiguration: {
-              name: `Videopass-${appProps.ubuntuVersion}-GoldenImage-{{imagebuilder:buildDate}}`,
+              name: `Videopass-${appProps.ubuntuVersion}-${appProps.phpVersion}-GoldenImage-{{imagebuilder:buildDate}}`,
             }
           }
         ]
       });
 
-      pipeline = new imagebuilder.CfnImagePipeline(this, 'VPImagePipeline', {
-        name: 'VideoPassImagePipeline',
+      pipeline = new imagebuilder.CfnImagePipeline(this, `VPImagePipeline-${appProps.phpVersion}`, {
+        name: `VideoPassImagePipeline-${appProps.phpVersion}`,
         imageRecipeArn: receipe!.attrArn,
         infrastructureConfigurationArn: infraConfig!.attrArn,
         distributionConfigurationArn: distributionConfig!.attrArn,

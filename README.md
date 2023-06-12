@@ -24,7 +24,7 @@ The package code is located in the `lib` directory. The `bin` directory contains
 
 ## First time setup
 
-requirement: Node.js 18.x or later
+requirement: Nodejs LTS
 
 ```bash
 npm i 
@@ -38,7 +38,13 @@ npm i
 ## CDK synth and deploy
 
 ```bash
-npx cdk deploy --profile telasa --require-approval never -e "VPGoldenImage-1804" 
+
+# For Ubuntu 18.04 + PHP7.2
+npx cdk deploy --profile telasa --require-approval never -e "VPPhp7GoldenImage"
+
+# For Ubuntu 18.04 + PHP5.6
+npx cdk deploy --profile telasa --require-approval never -e "VPPhp5GoldenImage" 
+
 ```
 
 ## Useful commands
