@@ -4,19 +4,20 @@ import { CdkImageBuilderStack } from '../lib/cdk-image-builder-stack';
 import { BasicOptions } from '../types';
 const app = new cdk.App();
 
-const ubuntu2204Props: BasicOptions = {
-   version: "1.0.0",
-   componentVersion: "1.0.0",
-   projectName: "VP",
-   pureAmiId: "ami-02ae3dea04b2cb88e",
-   ubuntuVersion: "2204",
-   phpVersion: "7-2",
-}
+// const ubuntu2204Props: BasicOptions = {
+//    version: "1.0.0",
+//    componentVersion: "1.0.0",
+//    projectName: "VP",
+//    pureAmiId: "ami-02ae3dea04b2cb88e",
+//    ubuntuVersion: "2204",
+//    phpVersion: "7-2",
+// }
 
 // aws ssm get-parameters --profile telasa --names /aws/service/canonical/ubuntu/server/18.04/stable/current/amd64/hvm/ebs-gp2/ami-id --query 'Parameters[0].[Value]' --output text
+
 const ubuntu1804Php7Props: BasicOptions = {
-   version: "1.0.0",
-   componentVersion: "1.0.0",
+   version: "1.0.2",
+   componentVersion: "1.0.2",
    projectName: "VPPhp7",
    pureAmiId: "ami-0e668b41786fecce6",
    ubuntuVersion: "1804",
@@ -24,8 +25,8 @@ const ubuntu1804Php7Props: BasicOptions = {
 }
 
 const ubuntu1804Php5Props: BasicOptions = {
-   version: "1.0.0",
-   componentVersion: "1.0.0",
+   version: "1.0.1",
+   componentVersion: "1.0.1",
    projectName: "VPPhp5",
    pureAmiId: "ami-0e668b41786fecce6",
    ubuntuVersion: "1804",

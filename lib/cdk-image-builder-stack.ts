@@ -72,9 +72,19 @@ export class CdkImageBuilderStack extends cdk.Stack {
                     - cd ~/ && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip && ./aws/install && rm -r ./aws
                     - echo "Install Cloudwatch Agent"
                     - cd ~/ && wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb && dpkg -i ./amazon-cloudwatch-agent.deb && rm ./amazon-cloudwatch-agent.deb
-                    - echo "Install Python 3.9"
-                    - add-apt-repository ppa:deadsnakes/ppa -y
-                    - apt install -y python python-pip python3-pip python3.9
+                    - echo "Make python 3.9"
+                    - py_version=3.9.17
+                    - apt install -y gcc make openssl libssl-dev zlib1g zlib1g-dev libffi-dev
+                    - curl -O https://www.python.org/ftp/python/${py_version}/Python-${py_version}.tgz
+                    - tar -zxvf Python-${py_version}.tgz
+                    - cd Python-${py_version}
+                    - ./configure --prefix=/usr/local/python/Python-${py_version} --with-ensurepip=install
+                    - make
+                    - make install
+                    - cd ..
+                    - rm -rf Python-${py_version} Python-${py_version}.tgz
+                    - ln -s /usr/local/python/Python-${py_version}/bin/* /usr/local/bin/
+                    - echo "Finish python 3.9 installation"
                     - echo "Install ppa:ondrej PHP, Gearman, Apache2"
                     - add-apt-repository ppa:ondrej/php -y
                     - add-apt-repository ppa:ondrej/pkg-gearman -y
@@ -82,11 +92,13 @@ export class CdkImageBuilderStack extends cdk.Stack {
                     - echo "Install Apache2"
                     - apt install -y apache2
                     - echo "Install PHP 7"
-                    - apt install -y php${dotPhpVersion}-common php${dotPhpVersion}-mcrypt php${dotPhpVersion}-curl php${dotPhpVersion}-mbstring php${dotPhpVersion}-mysql php${dotPhpVersion}-xml php${dotPhpVersion}-cli php${dotPhpVersion}-dev php${dotPhpVersion}-fpm php${dotPhpVersion}-gd php${dotPhpVersion}-json php${dotPhpVersion}-readline php${dotPhpVersion}-soap php${dotPhpVersion}-zip php${dotPhpVersion}-bcmath php${dotPhpVersion}-intl php${dotPhpVersion}-geoip php${dotPhpVersion}-sqlite php${dotPhpVersion}-redis php${dotPhpVersion}-gearman php${dotPhpVersion}-memcached
+                    - apt install -y php${dotPhpVersion}-common php${dotPhpVersion}-curl php${dotPhpVersion}-mbstring php${dotPhpVersion}-mysql php${dotPhpVersion}-xml php${dotPhpVersion}-cli php${dotPhpVersion}-dev php${dotPhpVersion}-fpm php${dotPhpVersion}-gd php${dotPhpVersion}-json php${dotPhpVersion}-readline php${dotPhpVersion}-soap php${dotPhpVersion}-zip php${dotPhpVersion}-bcmath php${dotPhpVersion}-intl php${dotPhpVersion}-geoip php${dotPhpVersion}-sqlite php${dotPhpVersion}-redis php${dotPhpVersion}-gearman php${dotPhpVersion}-memcached
                     - echo "Install Gearman"
                     - apt install -y libgearman-dev --no-install-recommends
                     - echo "Install Memcached"
                     - apt install -y memcached libmemcached-tools --no-install-recommends
+                    - echo "Try install PHP mcrypt"
+                    - apt install -y php${dotPhpVersion}-mcrypt
                     - echo "Remove apt cache"
                     - apt -y autoremove --purge
                     - apt clean
