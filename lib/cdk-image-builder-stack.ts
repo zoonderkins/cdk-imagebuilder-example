@@ -90,6 +90,13 @@ export class CdkImageBuilderStack extends cdk.Stack {
                     - echo "Remove apt cache"
                     - apt -y autoremove --purge
                     - apt clean
+                    - echo "Start download IDS Agent"
+                    - mkdir -p /root/ids-agent && cd /root/ids-agent
+                    - wget https://files.trendmicro.com/products/deepsecurity/en/20.0/Agent-Ubuntu_18.04-20.0.0-7476.x86_64.zip
+                    - unzip Agent-Ubuntu_18.04-20.0.0-7476.x86_64.zip
+                    - rm -r *.dsp *.txt *.asc META-INF
+                    - echo "Install IDS Agent"
+                    - dpkg -i Agent-Core-Ubuntu_18.04-20.0.0-7476.x86_64.deb
                     - echo "Image build completed"
         `
       })
