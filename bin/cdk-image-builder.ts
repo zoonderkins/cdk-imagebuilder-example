@@ -26,12 +26,13 @@ const ubuntu1804Php7Props: BasicOptions = {
 }
 
 const ubuntu1804Php5Props: BasicOptions = {
-   version: "1.0.1",
-   componentVersion: "1.0.1",
+   version: "1.0.2",
+   componentVersion: "1.0.2",
    projectName: "VPPhp5",
    pureAmiId: "ami-0e668b41786fecce6",
    ubuntuVersion: "1804",
    phpVersion: "5-6",
+   pyVersion: "3.9.17",
 }
 
 // cdk deploy --profile telasa --require-approval never -e "VPPhp7GoldenImage-2204" 
