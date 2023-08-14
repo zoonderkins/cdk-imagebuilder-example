@@ -22,6 +22,7 @@ const ubuntu1804Php7Props: BasicOptions = {
    pureAmiId: "ami-0e668b41786fecce6",
    ubuntuVersion: "1804",
    phpVersion: "7-2",
+   pyVersion: "3.9.17",
 }
 
 const ubuntu1804Php5Props: BasicOptions = {

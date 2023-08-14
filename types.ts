@@ -5,4 +5,5 @@ export type BasicOptions = {
     ubuntuVersion: string,
     componentVersion: string,
     phpVersion: string,
+    pyVersion?: string,
 }

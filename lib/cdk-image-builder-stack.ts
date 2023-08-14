@@ -73,17 +73,16 @@ export class CdkImageBuilderStack extends cdk.Stack {
                     - echo "Install Cloudwatch Agent"
                     - cd ~/ && wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb && dpkg -i ./amazon-cloudwatch-agent.deb && rm ./amazon-cloudwatch-agent.deb
                     - echo "Make python 3.9"
-                    - py_version=3.9.17
                     - apt install -y gcc make openssl libssl-dev zlib1g zlib1g-dev libffi-dev
-                    - curl -O https://www.python.org/ftp/python/${py_version}/Python-${py_version}.tgz
-                    - tar -zxvf Python-${py_version}.tgz
-                    - cd Python-${py_version}
-                    - ./configure --prefix=/usr/local/python/Python-${py_version} --with-ensurepip=install
+                    - curl -O https://www.python.org/ftp/python/${appProps.pyVersion}/Python-${appProps.pyVersion}.tgz
+                    - tar -zxvf Python-${appProps.pyVersion}.tgz
+                    - cd Python-${appProps.pyVersion}
+                    - ./configure --prefix=/usr/local/python/Python-${appProps.pyVersion} --with-ensurepip=install
                     - make
                     - make install
                     - cd ..
-                    - rm -rf Python-${py_version} Python-${py_version}.tgz
-                    - ln -s /usr/local/python/Python-${py_version}/bin/* /usr/local/bin/
+                    - rm -rf Python-${appProps.pyVersion} Python-${appProps.pyVersion}.tgz
+                    - ln -s /usr/local/python/Python-${appProps.pyVersion}/bin/* /usr/local/bin/
                     - echo "Finish python 3.9 installation"
                     - echo "Install ppa:ondrej PHP, Gearman, Apache2"
                     - add-apt-repository ppa:ondrej/php -y
