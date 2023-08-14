@@ -90,7 +90,7 @@ export class CdkImageBuilderStack extends cdk.Stack {
                     - add-apt-repository ppa:ondrej/apache2 libapache2-mod-fastcgi -y
                     - echo "Install Apache2"
                     - apt install -y apache2
-                    - echo "Install PHP 7"
+                    - echo "Install PHP ${dotPhpVersion}"
                     - apt install -y php${dotPhpVersion}-common php${dotPhpVersion}-curl php${dotPhpVersion}-mbstring php${dotPhpVersion}-mysql php${dotPhpVersion}-xml php${dotPhpVersion}-cli php${dotPhpVersion}-dev php${dotPhpVersion}-fpm php${dotPhpVersion}-gd php${dotPhpVersion}-json php${dotPhpVersion}-readline php${dotPhpVersion}-soap php${dotPhpVersion}-zip php${dotPhpVersion}-bcmath php${dotPhpVersion}-intl php${dotPhpVersion}-geoip php${dotPhpVersion}-sqlite php${dotPhpVersion}-redis php${dotPhpVersion}-gearman php${dotPhpVersion}-memcached
                     - echo "Install Gearman"
                     - apt install -y libgearman-dev --no-install-recommends
