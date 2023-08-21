@@ -108,6 +108,11 @@ export class CdkImageBuilderStack extends cdk.Stack {
                     - rm -r *.dsp *.txt *.asc META-INF
                     - echo "Install IDS Agent"
                     - dpkg -i Agent-Core-Ubuntu_18.04-20.0.0-7476.x86_64.deb
+                    - echo "Disable Ubuntu apt upgrade"
+                    - CONFIG='APT::Periodic::Update-Package-Lists "0"; APT::Periodic::Unattended-Upgrade "0";'
+                    - echo "$CONFIG" > /etc/apt/apt.conf.d/20auto-upgrades
+                    - cat /etc/apt/apt.conf.d/20auto-upgrades
+                    - echo "Disabled Ubuntu apt upgrade"
                     - echo "Image build completed"
         `
       })
