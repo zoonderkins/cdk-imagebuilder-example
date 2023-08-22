@@ -16,8 +16,8 @@ const app = new cdk.App();
 // aws ssm get-parameters --profile telasa --names /aws/service/canonical/ubuntu/server/18.04/stable/current/amd64/hvm/ebs-gp2/ami-id --query 'Parameters[0].[Value]' --output text
 
 const ubuntu1804Php7Props: BasicOptions = {
-   version: "1.0.2",
-   componentVersion: "1.0.2",
+   version: "1.0.3",
+   componentVersion: "1.0.3",
    projectName: "VPPhp7",
    pureAmiId: "ami-0e668b41786fecce6",
    ubuntuVersion: "1804",
